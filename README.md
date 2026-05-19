@@ -14,36 +14,39 @@ Built with **PostgreSQL · Python · pandas · SQLAlchemy · psycopg2 · yfinanc
 - **Finance computation in SQL** — Cumulative returns, drawdowns, rolling moving averages, 52-week highs, cross-sectional volatility, dividend yields
 
 ---
-
 ## Schema
-sectors                         companies
-┌──────────────┐                ┌────────────────────┐
-│ sector_id PK │◄──── FK ──────│ ticker          PK │
-│ sector_name  │                │ company_name       │
-└──────────────┘                │ sector_id       FK │
-│ market_cap_category│
-└────────────────────┘
-│
-┌─────────────┴────────────┐
-▼                          ▼
-daily_prices              corporate_events
-┌────────────────┐            ┌──────────────┐
-│ ticker      FK │            │ event_id  PK │
-│ date           │            │ ticker    FK │
-│ open           │            │ date         │
-│ high           │            │ event_type   │
-│ low            │            │ amount       │
-│ close          │            └──────────────┘
-│ adj_close      │
-│ volume         │
-│ PK(ticker,date)│
-└────────────────┘
+
+```
+┌─────────────────┐                      ┌──────────────────────┐
+│    sectors      │                      │     companies        │
+├─────────────────┤                      ├──────────────────────┤
+│ sector_id   PK  │◄────── FK ──────────┤ ticker          PK   │
+│ sector_name     │                      │ company_name         │
+└─────────────────┘                      │ sector_id        FK  │
+                                         │ market_cap_category  │
+                                         └──────────┬───────────┘
+                                                    │
+                                  ┌─────────────────┴──────────────┐
+                                  │                                │
+                                  ▼                                ▼
+                         ┌────────────────┐              ┌──────────────────┐
+                         │  daily_prices  │              │ corporate_events │
+                         ├────────────────┤              ├──────────────────┤
+                         │ ticker      FK │              │ event_id      PK │
+                         │ date           │              │ ticker        FK │
+                         │ open           │              │ date             │
+                         │ high           │              │ event_type       │
+                         │ low            │              │ amount           │
+                         │ close          │              └──────────────────┘
+                         │ adj_close      │
+                         │ volume         │
+                         │ PK(ticker,date)│
+                         └────────────────┘
+```
 
 **Indexes:** `daily_prices(ticker)`, `daily_prices(date)`, `companies(sector_id)`, `corporate_events(ticker)`.
 
 **Constraints:** `close > 0`, `high >= low`, `volume >= 0`, `event_type IN ('split','dividend')`.
-
----
 
 ## Data
 
